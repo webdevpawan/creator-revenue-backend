@@ -15,11 +15,22 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+const allowedOrigins = [
+  "http://localhost:4200",
+  "https://creator-revenue-frontend-o9xun3xg2-webdevpawans-projects.vercel.app",
+  "https://creator-revenue-frontend.vercel.app" // add your main vercel domain too
+];
+
 app.use(cors({
-  origin: "http://localhost:4200",
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
-
 // routes
 
 app.get("/", (req, res) => {
