@@ -1,5 +1,7 @@
 const mysql = require("mysql2/promise");
 const dotenv = require("dotenv");
+const initDB = require("../initdb");
+
 
 dotenv.config();
 
@@ -21,10 +23,11 @@ db.getConnection()
   .then((connection) => {
     console.log("✅ MySQL Connected Successfully");
     connection.release();
+    initDB(); // ✅ only runs after successful connection
   })
   .catch((err) => {
     console.error("❌ Database connection failed:", err.message);
-    console.error("Full error:", err);  // 👈 this will show exact error in Render logs
+    process.exit(1); // stop server if db fails
   });
 
 module.exports = db;
