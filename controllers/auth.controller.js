@@ -66,11 +66,12 @@ exports.login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // set true in production
+      secure: true,
+      sameSite: 'none',
       maxAge: 3600000,
     });
 
-    return res.json({ message: "Login Successful", code: 200, name : user.name });
+    return res.json({ message: "Login Successful", code: 200, name: user.name });
 
   } catch (error) {
     return res.status(500).json({ message: "Server error", error: error.message });
