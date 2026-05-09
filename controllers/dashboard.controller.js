@@ -109,30 +109,36 @@ exports.getDashboard = async (req, res) => {
         // =========================================
 
         const [campaignRows] = await db.query(
-            `
-            SELECT
-                l.id,
-                l.campaign AS name,
-                l.slug AS shortUrl,
-                COUNT(DISTINCT cl.id) AS clicks,
-                COALESCE(SUM(cv.amount), 0) AS revenue,
-                COUNT(DISTINCT cv.id) AS conversions,
-                l.created_at AS createdAt
-            FROM links l
-            LEFT JOIN clicks cl
-                ON l.id = cl.link_id
-            LEFT JOIN conversions cv
-                ON l.id = cv.link_id
-            WHERE l.user_id = ?
-            GROUP BY
-                l.id,
-                l.campaign,
-                l.slug,
-                l.created_at
-            ORDER BY revenue DESC
-            `,
-            [userId]
-        );
+                    `
+                    SELECT
+                        l.id,
+                        l.campaign AS name,
+                        l.slug AS shortUrl,
+                        COUNT(DISTINCT cl.id) AS clicks,
+                        COALESCE((
+                            SELECT SUM(cv.amount)
+                            FROM conversions cv
+                            WHERE cv.link_id = l.id
+                        ), 0) AS revenue,
+                        (
+                            SELECT COUNT(*)
+                            FROM conversions cv
+                            WHERE cv.link_id = l.id
+                        ) AS conversions,
+                        l.created_at AS createdAt
+                    FROM links l
+                    LEFT JOIN clicks cl
+                        ON l.id = cl.link_id
+                    WHERE l.user_id = ?
+                    GROUP BY
+                        l.id,
+                        l.campaign,
+                        l.slug,
+                        l.created_at
+                    ORDER BY revenue DESC
+                    `,
+                    [userId]
+                );
 
         // =========================================
         // INSIGHTS
