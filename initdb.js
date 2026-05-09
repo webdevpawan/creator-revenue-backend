@@ -1,6 +1,6 @@
-const db = require('./config/dbconnect');
+// const db = require('./config/dbconnect');
 
-const initDB = async () => {
+const initDB = async (db) => {
   try {
 
     // 1. Users (no dependencies)

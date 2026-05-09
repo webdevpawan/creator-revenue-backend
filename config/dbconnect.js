@@ -23,7 +23,7 @@ db.getConnection()
   .then((connection) => {
     console.log("✅ MySQL Connected Successfully");
     connection.release();
-    initDB(); // ✅ only runs after successful connection
+    initDB(db); // ✅ only runs after successful connection
   })
   .catch((err) => {
     console.error("❌ Database connection failed:", err.message);
