@@ -1,0 +1,138 @@
+{
+"info": {
+"name": "Creator Revenue API",
+"_postman_id": "12345-creator-api",
+"description": "Testing all backend APIs",
+"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+},
+"item": [
+
+{
+  "name": "Auth - Register",
+  "request": {
+    "method": "POST",
+    "header": [
+      { "key": "Content-Type", "value": "application/json" }
+    ],
+    "body": {
+      "mode": "raw",
+      "raw": "{\n  \"name\": \"Pawan\",\n  \"email\": \"pawan@test.com\",\n  \"password\": \"123456\"\n}"
+    },
+    "url": {
+      "raw": "http://localhost:5000/api/auth/register",
+      "protocol": "http",
+      "host": ["localhost"],
+      "port": "5000",
+      "path": ["api", "auth", "register"]
+    }
+  }
+},
+
+{
+  "name": "Auth - Login",
+  "request": {
+    "method": "POST",
+    "header": [
+      { "key": "Content-Type", "value": "application/json" }
+    ],
+    "body": {
+      "mode": "raw",
+      "raw": "{\n  \"email\": \"pawan@test.com\",\n  \"password\": \"123456\"\n}"
+    },
+    "url": {
+      "raw": "http://localhost:5000/api/auth/login",
+      "protocol": "http",
+      "host": ["localhost"],
+      "port": "5000",
+      "path": ["api", "auth", "login"]
+    }
+  }
+},
+
+{
+  "name": "Create Link",
+  "request": {
+    "method": "POST",
+    "header": [
+      { "key": "Content-Type", "value": "application/json" },
+      { "key": "Authorization", "value": "Bearer {{token}}" }
+    ],
+    "body": {
+      "mode": "raw",
+      "raw": "{\n  \"originalUrl\": \"https://example.com/product\",\n  \"campaign\": \"reel1\",\n  \"title\": \"Fitness Reel\"\n}"
+    },
+    "url": {
+      "raw": "http://localhost:5000/api/links",
+      "protocol": "http",
+      "host": ["localhost"],
+      "port": "5000",
+      "path": ["api", "links"]
+    }
+  }
+},
+
+{
+  "name": "Get Links",
+  "request": {
+    "method": "GET",
+    "header": [
+      { "key": "Authorization", "value": "Bearer {{token}}" }
+    ],
+    "url": {
+      "raw": "http://localhost:5000/api/links",
+      "protocol": "http",
+      "host": ["localhost"],
+      "port": "5000",
+      "path": ["api", "links"]
+    }
+  }
+},
+
+{
+  "name": "Redirect (Test in Browser)",
+  "request": {
+    "method": "GET",
+    "url": {
+      "raw": "http://localhost:5000/r/{{slug}}",
+      "protocol": "http",
+      "host": ["localhost"],
+      "port": "5000",
+      "path": ["r", "{{slug}}"]
+    }
+  }
+},
+
+{
+  "name": "Add Conversion",
+  "request": {
+    "method": "POST",
+    "header": [
+      { "key": "Content-Type", "value": "application/json" },
+      { "key": "Authorization", "value": "Bearer {{token}}" }
+    ],
+    "body": {
+      "mode": "raw",
+      "raw": "{\n  \"linkId\": 1,\n  \"amount\": 5000\n}"
+    },
+    "url": {
+      "raw": "http://localhost:5000/api/conversions",
+      "protocol": "http",
+      "host": ["localhost"],
+      "port": "5000",
+      "path": ["api", "conversions"]
+    }
+  }
+}
+
+],
+"variable": [
+{
+"key": "token",
+"value": ""
+},
+{
+"key": "slug",
+"value": ""
+}
+]
+}
