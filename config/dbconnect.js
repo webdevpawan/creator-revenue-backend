@@ -3,26 +3,28 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-// ✅ Use createPool instead of createConnection
 const db = mysql.createPool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
   ssl: {
-    rejectUnauthorized: true
+    rejectUnauthorized: false
   }
 });
 
 // Test Connection
 db.getConnection()
   .then((connection) => {
-    console.log("MySQL Connected Successfully");
+    console.log("✅ MySQL Connected Successfully");
     connection.release();
   })
   .catch((err) => {
-    console.log("Database connection failed:", err.message);
+    console.error("❌ Database connection failed:", err.message);
+    console.error("Full error:", err);  // 👈 this will show exact error in Render logs
   });
 
 module.exports = db;
