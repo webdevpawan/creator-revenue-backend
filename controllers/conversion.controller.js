@@ -50,7 +50,6 @@ exports.getConversions = async (req, res) => {
 
 exports.importConversions = async (req, res) => {
   try {
-
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -65,54 +64,59 @@ exports.importConversions = async (req, res) => {
       .on('data', (data) => {
         results.push(data);
       })
-
       .on('end', async () => {
-
         for (const row of results) {
+          const { campaignName, amount } = row;
 
-          const { campaignName, amount, linkId } = row;
-
-          await db.query(
-            `INSERT INTO conversions 
-            (user_id, link_id, amount, campaignName)
-            VALUES (?, ?, ?, ?)`,
-            [
-              req.user.id,
-              linkId,
-              amount,
-              campaignName
-            ]
+          // Find link automatically
+          const [linkRows] = await db.query(
+            `SELECT id
+             FROM links
+             WHERE campaign = ?
+             AND user_id = ?
+             LIMIT 1`,
+            [campaignName, req.user.id]
           );
 
+          // Skip if campaign not found
+          if (linkRows.length === 0) {
+            continue;
+          }
+
+          const linkId = linkRows[0].id;
+
+          // Insert conversion
+          await db.query(
+            `INSERT INTO conversions
+             (user_id, link_id, amount, campaignName)
+             VALUES (?, ?, ?, ?)`,
+            [req.user.id, linkId, amount, campaignName]
+          );
+
+          // Update stats
           await db.query(
             `UPDATE stats
              SET total_revenue = total_revenue + ?
              WHERE link_id = ?`,
             [amount, linkId]
           );
-        
         }
-          await db.query(
-            `INSERT INTO upload_logs
-            (user_id, file_name, total_records)
-            VALUES (?, ?, ?)`,
-            [
-              req.user.id,
-              req.file.filename,
-              results.length
-            ]
-          );
+
+        await db.query(
+          `INSERT INTO upload_logs
+           (user_id, file_name, total_records)
+           VALUES (?, ?, ?)`,
+          [req.user.id, req.file.filename, results.length]
+        );
+
         fs.unlinkSync(req.file.path);
 
         return res.status(200).json({
           success: true,
           message: 'CSV imported successfully'
         });
-
       });
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
