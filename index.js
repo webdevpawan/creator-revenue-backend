@@ -18,6 +18,7 @@ app.use(cookieParser());
 const allowedOrigins = [
   "http://localhost:4200",
   "https://creator-revenue-frontend-o9xun3xg2-webdevpawans-projects.vercel.app",
+  "https://creator-revenue-frontend-3la1ld9jf-webdevpawans-projects.vercel.app/",
   "https://creator-revenue-frontend.vercel.app" // add your main vercel domain too
 ];
 
