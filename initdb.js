@@ -99,6 +99,21 @@ const initDB = async (db) => {
     `);
     console.log("✅ upload_logs table ready");
 
+    await db.query(
+      `CREATE TABLE  IF NOT EXISTS subscriptions (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        user_id INT NOT NULL,
+        razorpay_order_id VARCHAR(255),
+        razorpay_payment_id VARCHAR(255),
+        plan_name VARCHAR(100),
+        amount DECIMAL(10,2),
+        status VARCHAR(50) DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );`
+    )
+    console.log("✅ subscriptions table ready");
+
+
     console.log("🎉 All tables created successfully!");
 
   } catch (err) {

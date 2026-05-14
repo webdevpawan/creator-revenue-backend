@@ -46,6 +46,7 @@ app.get("/", (req, res) => {
     res.json("hello world")
 })
 
+app.use('/api/payment',  require('./routes/payment.route'));
 app.use('/api/auth', require('./routes/auth.route'));
 app.use('/api/dashboard', require('./routes/dashboard.route'));
 
