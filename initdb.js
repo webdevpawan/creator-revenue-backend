@@ -10,6 +10,7 @@ const initDB = async (db) => {
         name varchar(100) DEFAULT NULL,
         email varchar(150) DEFAULT NULL,
         password_hash varchar(255) DEFAULT NULL,
+        plan varchar(50) DEFAULT 'free',
         created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
         UNIQUE KEY email (email)
@@ -113,6 +114,26 @@ const initDB = async (db) => {
     )
     console.log("✅ subscriptions table ready");
 
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS payments (
+          id int NOT NULL AUTO_INCREMENT,
+          user_id int NOT NULL,
+          razorpay_order_id varchar(255) DEFAULT NULL,
+          razorpay_payment_id varchar(255) DEFAULT NULL,
+          plan_name varchar(100) DEFAULT NULL,
+          amount decimal(10,2) DEFAULT NULL,
+          status varchar(50) DEFAULT 'created',
+          created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (id),
+          KEY user_id (user_id),
+          CONSTRAINT payments_ibfk_1
+            FOREIGN KEY (user_id)
+            REFERENCES users (id)
+            ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+      `);
+
+    console.log("✅ payments table ready");
 
     console.log("🎉 All tables created successfully!");
 
