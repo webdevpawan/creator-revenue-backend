@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const db = require("../config/dbconnect");
+const sendEmail = require('../services/mailService');
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -26,6 +27,15 @@ exports.register = async (req, res) => {
       "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
       [name, email, hashedPassword]
     );
+
+    await sendEmail({
+      to: email,
+      subject: 'Welcome to Creator Revenue',
+      html: `
+    <h2>Welcome ${name} 👋</h2>
+    <p>Your account has been created successfully.</p>
+    <p>Start tracking your creator revenue now.</p> `
+    });
 
     return res.status(201).json({
       message: "User registered successfully",
@@ -72,6 +82,14 @@ exports.login = async (req, res) => {
       secure: true,
       sameSite: 'none',
       maxAge: 3600000,
+    });
+
+    await sendEmail({
+      to: user.email,
+      subject: 'New Login Detected',
+      html: `
+    <h2>Hello ${user.name}</h2>
+    <p>You logged into your account successfully.</p>`
     });
 
     return res.json({ message: "Login Successful", code: 200, name: user.name, userId: user.id });
@@ -138,10 +156,11 @@ exports.googleLogin = async (req, res) => {
     );
 
     let user;
+    let isNewUser = false;
 
     // Create user if not exists
     if (users.length === 0) {
-
+      isNewUser = true;
       const [result] = await db.query(
         `
         INSERT INTO users
@@ -156,18 +175,14 @@ exports.googleLogin = async (req, res) => {
           'google'
         ]
       );
-
       user = {
         id: result.insertId,
         email,
         name
       };
-
     } else {
-
       user = users[0];
     }
-
     // JWT
     const jwtToken = jwt.sign(
       {
@@ -179,7 +194,6 @@ exports.googleLogin = async (req, res) => {
         expiresIn: '1h'
       }
     );
-
     // Cookie
     res.cookie('token', jwtToken, {
       httpOnly: true,
@@ -189,6 +203,37 @@ exports.googleLogin = async (req, res) => {
         : 'lax',
       maxAge: 3600000,
     });
+
+    // Send Email
+    if (isNewUser) {
+      await sendEmail({
+        to: user.email,
+        subject: 'Welcome to Creator Revenue 🚀',
+        html: `
+          <h2>Welcome ${user.name}</h2>
+
+          <p>
+            Your account has been created successfully using Google Login.
+          </p>
+
+          <p>
+            Welcome to Creator Revenue 🚀
+          </p>
+        `
+      });
+    } else {
+      await sendEmail({
+        to: user.email,
+        subject: 'New Login Detected',
+        html: `
+          <h2>Hello ${user.name}</h2>
+
+          <p>
+            You logged into your account successfully.
+          </p>
+        `
+      });
+    }
 
     return res.json({
       message: "Login Successful",
