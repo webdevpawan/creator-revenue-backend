@@ -28,14 +28,14 @@ exports.register = async (req, res) => {
       [name, email, hashedPassword]
     );
 
-    await sendEmail({
-      to: email,
-      subject: 'Welcome to Creator Revenue',
-      html: `
-    <h2>Welcome ${name} 👋</h2>
-    <p>Your account has been created successfully.</p>
-    <p>Start tracking your creator revenue now.</p> `
-    });
+    // await sendEmail({
+    //   to: email,
+    //   subject: 'Welcome to Creator Revenue',
+    //   html: `
+    // <h2>Welcome ${name} 👋</h2>
+    // <p>Your account has been created successfully.</p>
+    // <p>Start tracking your creator revenue now.</p> `
+    // });
 
     return res.status(201).json({
       message: "User registered successfully",
@@ -84,13 +84,13 @@ exports.login = async (req, res) => {
       maxAge: 3600000,
     });
 
-    await sendEmail({
-      to: user.email,
-      subject: 'New Login Detected',
-      html: `
-    <h2>Hello ${user.name}</h2>
-    <p>You logged into your account successfully.</p>`
-    });
+    // await sendEmail({
+    //   to: user.email,
+    //   subject: 'New Login Detected',
+    //   html: `
+    // <h2>Hello ${user.name}</h2>
+    // <p>You logged into your account successfully.</p>`
+    // });
 
     return res.json({ message: "Login Successful", code: 200, name: user.name, userId: user.id });
 
@@ -205,35 +205,35 @@ exports.googleLogin = async (req, res) => {
     });
 
     // Send Email
-    if (isNewUser) {
-      await sendEmail({
-        to: user.email,
-        subject: 'Welcome to Creator Revenue 🚀',
-        html: `
-          <h2>Welcome ${user.name}</h2>
+    // if (isNewUser) {
+    //   await sendEmail({
+    //     to: user.email,
+    //     subject: 'Welcome to Creator Revenue 🚀',
+    //     html: `
+    //       <h2>Welcome ${user.name}</h2>
 
-          <p>
-            Your account has been created successfully using Google Login.
-          </p>
+    //       <p>
+    //         Your account has been created successfully using Google Login.
+    //       </p>
 
-          <p>
-            Welcome to Creator Revenue 🚀
-          </p>
-        `
-      });
-    } else {
-      await sendEmail({
-        to: user.email,
-        subject: 'New Login Detected',
-        html: `
-          <h2>Hello ${user.name}</h2>
+    //       <p>
+    //         Welcome to Creator Revenue 🚀
+    //       </p>
+    //     `
+    //   });
+    // } else {
+    //   await sendEmail({
+    //     to: user.email,
+    //     subject: 'New Login Detected',
+    //     html: `
+    //       <h2>Hello ${user.name}</h2>
 
-          <p>
-            You logged into your account successfully.
-          </p>
-        `
-      });
-    }
+    //       <p>
+    //         You logged into your account successfully.
+    //       </p>
+    //     `
+    //   });
+    // }
 
     return res.json({
       message: "Login Successful",
