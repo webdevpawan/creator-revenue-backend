@@ -1,6 +1,9 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const db = require("../config/dbconnect");
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 
 // ================= REGISTER =================
 exports.register = async (req, res) => {
@@ -71,7 +74,7 @@ exports.login = async (req, res) => {
       maxAge: 3600000,
     });
 
-    return res.json({ message: "Login Successful", code: 200, name: user.name, userId : user.id });
+    return res.json({ message: "Login Successful", code: 200, name: user.name, userId: user.id });
 
   } catch (error) {
     return res.status(500).json({ message: "Server error", error: error.message });
@@ -96,6 +99,111 @@ exports.logout = async (req, res) => {
     return res.status(500).json({
       message: "Server error",
       error: error.message,
+    });
+  }
+};
+
+
+exports.googleLogin = async (req, res) => {
+
+  try {
+
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        message: 'Google token missing'
+      });
+    }
+
+    // Verify Google Token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+
+    const {
+      email,
+      name,
+      picture,
+      sub
+    } = payload;
+
+    // Find user
+    const [users] = await db.query(
+      'SELECT * FROM users WHERE email = ?',
+      [email]
+    );
+
+    let user;
+
+    // Create user if not exists
+    if (users.length === 0) {
+
+      const [result] = await db.query(
+        `
+        INSERT INTO users
+        (name, email, google_id, avatar, provider)
+        VALUES (?, ?, ?, ?, ?)
+        `,
+        [
+          name,
+          email,
+          sub,
+          picture,
+          'google'
+        ]
+      );
+
+      user = {
+        id: result.insertId,
+        email,
+        name
+      };
+
+    } else {
+
+      user = users[0];
+    }
+
+    // JWT
+    const jwtToken = jwt.sign(
+      {
+        id: user.id,
+        email: user.email
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '1h'
+      }
+    );
+
+    // Cookie
+    res.cookie('token', jwtToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production'
+        ? 'none'
+        : 'lax',
+      maxAge: 3600000,
+    });
+
+    return res.json({
+      message: "Login Successful",
+      code: 200,
+      name: user.name,
+      userId: user.id
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    return res.status(500).json({
+      message: 'Google login failed',
+      error: error.message
     });
   }
 };
